@@ -45,56 +45,12 @@ options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 ```
 
-Also, source the script that contains the data-simulating function 
-`draw_data()` and the function `solve_for_hiershrink_scale()`, which
-is used to solve for the scale parameter. 
+## Data
+
+Two simulated data sets are included in the package.
 
 ```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
-#source("functions_simulation.R") # For access to the draw_data() function
-```
 
-## Draw data
-
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
-## Draw Data ====##############################################
-# Choose your own values if desired
-set.seed(1);
-n_hist = 500;
-n_curr = 100;
-n_new = 1e3;
-# this is different from the misspecified marginal prevalence;
-# see Remark 3 in the manuscript
-true_mu_hist = 0;
-true_mu_curr = -2.5;
-# original betas common to both analyses:
-true_betas_orig = c(2,-2,1,-1);
-# augmented betas exclusive to current analysis:
-true_betas_aug = c(-1,-1,0.5,0.5,-0.25,-0.25);
-covariate_args = list(x_correlation = 0.2,
-                      x_orig_binom = 1:length(true_betas_orig),
-                      x_aug_binom = 1:length(true_betas_aug));
-complete_dat = draw_data(n_hist = n_hist, 
-                         n_curr = n_curr,
-                         n_new = n_new,
-                         true_mu_hist = true_mu_hist,
-                         true_mu_curr = true_mu_curr,
-                         true_betas_orig = true_betas_orig,
-                         true_betas_aug = true_betas_aug,
-                         covariate_args = covariate_args);
-orig_covariates = paste0("orig",1:length(true_betas_orig));
-aug_covariates = paste0("aug",1:length(true_betas_aug));
-y_hist = complete_dat$y_hist;
-y_curr = complete_dat$y_curr;
-x_hist_orig = as.matrix(complete_dat$x_hist_orig);
-x_curr_orig = as.matrix(complete_dat$x_curr_orig);
-colnames(x_hist_orig) = 
-  colnames(x_curr_orig) = orig_covariates;
-x_curr_aug = as.matrix(complete_dat$x_curr_aug);
-# 'x_hist_aug' is essentially missing here, since those data
-# were not collected in the historical analysis
-colnames(x_curr_aug) = aug_covariates;
-p = length(true_betas_orig);
-q = length(true_betas_aug)
 ```
 
 ## Methods to fit
