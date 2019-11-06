@@ -5,7 +5,7 @@
 #'
 #'
 #'
-#' @export
+#'
 "historical"
 
 #' Add title
@@ -13,5 +13,5 @@
 #' Add description
 #'
 #'
-#' @export
+#'
 "current"

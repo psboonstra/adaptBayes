@@ -15,7 +15,7 @@
 ---
 
 
-```{r, echo=F, warning=F, message=F, cache=T, include=F, eval=F}
+```{r, echo=F, warning=F, message=F, cache=T, include=F, eval=T}
 options(digits = 3)
 ```
 
@@ -29,7 +29,7 @@ functions `glm_standard()`, `glm_nab()`, and `glm_sab()` in the
 First, install and load the `adaptBayes` package and other necessary 
 packages:
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 if(!require(adaptBayes)) {
   library(devtools)
   # if installation is necessary, compiling everything will take a few minutes
@@ -38,7 +38,7 @@ if(!require(adaptBayes)) {
 
 library(mice);library(Hmisc);library(MASS)
 library(rstan);library(Matrix);library(mnormt)
-library(tidyverse)
+library(tidyverse); library(adaptBayes)
 
 # some recommended options from the STAN development team
 options(mc.cores = parallel::detectCores())
@@ -47,10 +47,50 @@ rstan_options(auto_write = TRUE)
 
 ## Data
 
-Two simulated data sets are included in the package.
+Two simulated data sets are included in the package. The data set `current` is used whenever `curr_method = "current"` and `historical` is used whenever `curr_method = "historical"`. Here, we load the data sets into memory.
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
+data(historical)
+data(current)
+```
 
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
+n_hist = 500;
+n_curr = 100;
+n_new = 1e3;
+# this is different from the misspecified marginal prevalence;
+# see Remark 3 in the manuscript
+true_mu_hist = 0;
+true_mu_curr = -2.5;
+# original betas common to both analyses:
+true_betas_orig = c(2,-2,1,-1);
+# augmented betas exclusive to current analysis:
+true_betas_aug = c(-1,-1,0.5,0.5,-0.25,-0.25);
+covariate_args = list(x_correlation = 0.2,
+                      x_orig_binom = 1:length(true_betas_orig),
+                      x_aug_binom = 1:length(true_betas_aug));
+# complete_dat = draw_data(n_hist = n_hist, 
+#                          n_curr = n_curr,
+#                          n_new = n_new,
+#                          true_mu_hist = true_mu_hist,
+#                          true_mu_curr = true_mu_curr,
+#                          true_betas_orig = true_betas_orig,
+#                          true_betas_aug = true_betas_aug,
+#                          covariate_args = covariate_args);
+orig_covariates = paste0("orig",1:length(true_betas_orig));
+aug_covariates = paste0("aug",1:length(true_betas_aug));
+y_hist = historical$y_hist;
+y_curr = current$y_curr;
+x_hist_orig = as.matrix(historical[,2:5]);
+x_curr_orig = as.matrix(current[,2:5]);
+colnames(x_hist_orig) = 
+  colnames(x_curr_orig) = orig_covariates;
+x_curr_aug = as.matrix(current[,6:11]);
+# 'x_hist_aug' is essentially missing here, since those data
+# were not collected in the historical analysis
+colnames(x_curr_aug) = aug_covariates;
+p = length(true_betas_orig);
+q = length(true_betas_aug);
 ```
 
 ## Methods to fit
@@ -69,7 +109,7 @@ respectively.
 Here the hyperparameters for $\phi$ are also described. The truncation
 to the interval [0,1] is always assumed and not necessary to specify. 
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ##Methods to fit====#########################################
 # Each element of this list will be crossed with each adaptive
 # prior. 
@@ -91,7 +131,7 @@ expanded_meth_names = c("Historical",
 Specify the hyperparameters, including deriving values of $c$ using 
 the function `solve_for_hiershrink_scale`
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## Model hyperparameters====################
 local_dof = 1;
 global_dof = 1;
@@ -154,7 +194,7 @@ store_hierarchical_scales$NAB_aug_tilde = nab_augmented_scale
 
 ## Model hyperparameters
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## MC Params ====#########################################
 mc_warmup = 1e3;
 mc_iter_after_warmup = 1e3;
@@ -170,7 +210,7 @@ ntries_per_iter = 2
 
 ## Methods: Historical
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## Historical ====#########################################
 #Historical analysis only
 curr_method = "Historical";
@@ -188,7 +228,7 @@ For `glm_standard`, the only difference is that you can specify
 different scale hyperparameters to be applied to the original
 and augmented regression coefficients. 
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 foo = glm_standard(y = y,
                    x_standardized = x_standardized, 
                    p = p,
@@ -222,7 +262,7 @@ rm(foo, curr_method, y, x_standardized, beta_orig_scale, beta_aug_scale)
 
 ## Methods: Standard
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## Standard ====#############################################
 #Standard analysis of current data, ignoring historical model
 curr_method = "Standard";
@@ -237,7 +277,7 @@ up to be equal to the number of columns in `x_standardized`.
 But note now that `x_standardized` has more columns and contains
 a different set of observations.
  
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 foo = glm_standard(y = y,
                    x_standardized = x_standardized, 
                    p = p,
@@ -271,7 +311,7 @@ rm(foo, curr_method, y, x_standardized, beta_orig_scale, beta_aug_scale)
 
 ## Methods: NAB
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## NAB ====#########################################################
 #Naive Adaptive Bayes: apply Historical analysis directly as a prior on beta_orig. 
 
@@ -337,7 +377,7 @@ rm(foo, curr_method, y, x_standardized, beta_orig_scale, beta_aug_scale,
 
 ## Methods: SAB
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## SAB ====######################################################
 #Sensible Adaptive Bayes: apply Historical analysis as a prior on beta_orig + projection%*%beta_aug 
 curr_base_method = "SAB";
@@ -350,7 +390,7 @@ beta_aug_scale = store_hierarchical_scales[[curr_base_method]];
 This function creates the projection matrix P in Equation (3.8)
 of the manuscript
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 aug_projection = create_projection(x_curr_orig = x_curr_orig,
                                    x_curr_aug = x_curr_aug,
                                    eigenvec_hist_var = t(eigendecomp_hist_var$vectors),
@@ -403,12 +443,12 @@ rm(aug_projection, alpha_prior_mean, alpha_prior_cov, scale_to_variance225, eige
 
 ## Results
 
-```{r, echo=F, warning=F, message=F, cache=T, include=F, eval=F}
+```{r, echo=F, warning=F, message=F, cache=T, include=F, eval=T}
 options(digits = 3)
 ```
 
 
-```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=F}
+```{r, echo=T, warning=F, message=F, cache=T, include=T, eval=T}
 ## Results ====####################################################
 
 # Posterior mean
