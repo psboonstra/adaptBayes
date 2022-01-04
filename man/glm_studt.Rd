@@ -5,9 +5,9 @@
 \title{Fit GLM with a regularized student-t prior regression coefficients}
 \usage{
 glm_studt(
-  stan_fit = stanmodels$RegStudT,
   y,
   x_standardized,
+  family = "binomial",
   beta_scale,
   dof = 1,
   slab_precision = (1/15)^2,
@@ -19,14 +19,10 @@ glm_studt(
   mc_stepsize = 0.1,
   mc_adapt_delta = 0.9,
   mc_max_treedepth = 15,
-  ntries = 1,
   return_as_stanfit = FALSE
 )
 }
 \arguments{
-\item{stan_fit}{an R object of class stanfit, which allows the function to run
-without recompiling the stan code.}
-
 \item{y}{(vector) outcomes corresponding to the type of glm desired. This should
 match whatever datatype is expected by the stan program.}
 
@@ -62,10 +58,6 @@ this is equivalent to (1/d)^2 in the notation of Boonstra and Barbaro}
 
 \item{mc_max_treedepth}{max tree depth}
 
-\item{ntries}{(pos. integer) the stan function will run up to this many times,
-stopping either when the number of divergent transitions* is zero or when ntries
-has been reached. The reported fit will be that with the fewest number of divergent iterations.}
-
 \item{return_as_stanfit}{(logical) should the function return the stanfit
 object asis or should a summary of stanfit be returned as a regular list}
 }
@@ -96,8 +88,7 @@ used in the data analysis. Specifically, it corresponds to 'PedRESC2'.
                     mc_thin = 1,
                     mc_stepsize = 0.1,
                     mc_adapt_delta = 0.99,
-                    mc_max_treedepth = 15,
-                    ntries = 2);
+                    mc_max_treedepth = 15);
 
     data(current)
 
@@ -113,7 +104,6 @@ used in the data analysis. Specifically, it corresponds to 'PedRESC2'.
                     mc_thin = 1,
                     mc_stepsize = 0.1,
                     mc_adapt_delta = 0.99,
-                    mc_max_treedepth = 15,
-                    ntries = 2);
+                    mc_max_treedepth = 15);
 
 }
