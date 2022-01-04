@@ -16,12 +16,12 @@
 #' @param family (character) Similar to argument in `glm` with the same name, but
 #'  here this must be a character, and currently only 'binomial' (if y is binary) or
 #' 'gaussian' (if y is continuous) are valid choices.
-#' @param p,
+#' @param p insert description,
 #' @param q (nonneg. integers) numbers, the sum of which add up to the number of columns
 #' in x_standardized. For the standard prior, this distinction is only needed if a different
 #' constant scale parameter (beta_orig_scale, beta_aug_scale), which is the constant 'c'
 #' in the notation of Boonstra and Barbaro, is used.
-#' @param beta_orig_scale,
+#' @param beta_orig_scale insert description,
 #' @param beta_aug_scale (pos. real) constants indicating the prior scale of the
 #' horseshoe. Both values correspond to 'c / sigma' in the notation of Boonstra and Barbaro,
 #' because that paper never considers beta_orig_scale!=beta_aug_scale. Use

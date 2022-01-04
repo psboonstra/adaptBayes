@@ -36,7 +36,7 @@
 #' shape parameters is much less than 1. An error will be thrown if an invalid parameterization
 #' is provided, and a warning will be thrown if a parameterization is provided
 #' that is likely to result in a "challenging" prior.
-#' @param beta_orig_scale,
+#' @param beta_orig_scale insert description,
 #' @param beta_aug_scale (pos. real) constants indicating the prior scale of the
 #' horseshoe. Both values correspond to 'c / sigma' in the notation of Boonstra and Barbaro,
 #' because that paper never considers beta_orig_scale!=beta_aug_scale. Use
